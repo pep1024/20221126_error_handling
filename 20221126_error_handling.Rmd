@@ -1,0 +1,137 @@
+---
+title: "Functions to handle errors in R and python"
+author: "Pep Porrà"
+date: '2022-11-26'
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Goal
+
+Explore functions to handle errors (intercept them) in both R and python
+
+## References
+
+* Advance R
+* Efficient R programming
+* Python for dats Scientists
+* Python handbook
+
+## R
+
+Let us take a simple example. We call a function `f()` that, in some cases, 
+raises an error and stops execution. If `f()` function
+is called within one of our functions or scripts, it will stop as soon as `f()`
+fails. 
+
+```{r}
+f <- function(x) charToRaw(x)
+```
+
+
+```{r, eval = FALSE}
+f(9)
+#> Error in charToRaw(x) : argument must be a character vector of length 1
+```
+
+```{r, eval = FALSE}
+our_function <- function(x){
+  y <- f(x)
+  now <- Sys.time()
+  class(y)
+  return(now)
+}
+
+our_function(9)
+#> Error in charToRaw(x) : argument must be a character vector of length 1
+```
+
+### `try()`
+
+
+```{r}
+our_function_1 <- function(x){
+  y <- try(f(x))
+  now <- Sys.time()
+  print(class(y))
+  return(now)
+}
+our_function_1(9)
+```
+
+With `try()` function, execution does not stop after the error. Error message is
+shown but code after the error is executed
+
+
+```{r}
+our_function_1 <- function(x){
+  y <- try(f(x), silent = TRUE)
+  now <- Sys.time()
+  class(y)
+  return(now)
+}
+our_function_1(9)
+```
+Parameter `silent = TRUE` of `try()` function prevents the message error to be
+shown.
+
+Note that `try()` return an object of class "try-error" when `f()`call fails,
+which can be used to run specific actions after the error [1]:
+
+```{r}
+our_function_1 <- function(x){
+  y <- try(f(x), silent = TRUE)
+  if (class(y) == "try-error") {
+    # action after the error is detected
+    message("ERROR in function f")
+  }
+  now <- Sys.time()
+  class(y)
+  return(now)
+}
+our_function_1(9)
+```
+
+### `tryCatch()`
+
+```{r}
+our_function_2 <- function(x){
+  y <- tryCatch( f(x),
+    error = function(c) {
+      message("standard error message: ", c$message, "\n")
+      message("Additional information ...\n")
+    },
+    finally = message("End of function tryCatch()"))
+  if (class(y) == "try-error") {
+    # action after the error is detected
+    message("ERROR in function f")
+  } else {
+    message(paste("y =", y))
+  }
+  now <- Sys.time()
+  message(paste("class of y:", class(y)))
+  return(now)
+}
+our_function_2(9)
+```
+```{r}
+suppressMessages(our_function_2(9))
+```
+
+```{r}
+our_function_2("9")
+```
+
+## Python
+
+```{r}
+reticulate::py_config()
+```
+
+```{python}
+# def 
+```
+
